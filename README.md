@@ -5,11 +5,65 @@
 On January 2020 considering GMT time zone:
 
 1. Total equipment failures that happened?
-asdas
+The query:
+```sql
+SELECT
+  COUNT(*) AS numberOfFailures
+FROM
+  RAW_LOGS.equipment_logs
+WHERE
+  DATE(eventTimestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+```
+shows the number of failures to be 11645.
+
 2. Which equipment code had most failures?
-asdasd
+The query:
+```sql
+SELECT
+  code,
+  COUNT(*) AS numberOfFailures
+FROM
+  RAW_LOGS.equipment_logs
+WHERE
+  DATE(eventTimestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+GROUP BY code
+ORDER BY numberOfFailures DESC
+LIMIT 1
+```
+shows E1AD07D4 to be the code of the equipment with most failures.
+
 3. Average amount of failures across equipment group, ordering by the amount of failures in ascending order?
-adsasd
+The query:
+```sql
+WITH calculated_totals AS (
+SELECT
+  group_name,
+  COUNT(*) OVER (PARTITION BY group_name) as totalFailuresPerGroup,
+  COUNT(*) OVER () AS totalNumberOfFailures
+  
+FROM
+  RAW.equipment_logs
+WHERE
+  DATE(eventTimestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+)
+
+SELECT DISTINCT
+  group_name,
+  ROUND((totalFailuresPerGroup / totalNumberOfFailures), 2) AS avgFailuresPerGroup
+FROM
+  calculated_totals
+ORDER BY avgFailuresPerGroup ASC
+```
+produces the following results:
+
+| group_name | avgFailuresPerGroup |
+|------------|---------------------|
+| Z9K1SAP4   |                 0.1 |
+| VAPQY59S   |                0.14 |
+| 9N127Z5P   |                0.15 |
+| NQWPA8D3   |                0.15 |
+| PA92NCXZ   |                0.15 |
+| FGHQWR2Q   |                0.31 |
 
 #### Solution
 
@@ -31,12 +85,13 @@ For automating this workflow, [Cloud Functions](https://cloud.google.com/functio
 4. Deployment of the Cloud Function.
 5. Creation of the BigQuery dataset.
 
-__Note__: The functions file has its content commented out. The reason for this is that the Composer environment must be created before the function, as information about the it must be filled in the function code before deployment. More on this in the [instructions](#cloud-function-setup) section.
+__Note__: The functions file has its content commented out. The reason for this is that the Composer environment must be created before the function, as information about the it must be filled in the function code before deployment. More on this in the instructions section.
 
 ###### Architecture
 The developed solution follows this diagram:
 
 ![solution_diagram](solution_diagram.png)
+
 1. The log file is uploaded to a GCS Bucket.
 2. The object creation event triggers a Cloud Function.
 3. The Cloud Function triggers an Airflow DAG on Cloud Composer.
