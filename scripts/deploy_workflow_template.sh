@@ -1,3 +1,4 @@
+cd dataproc
 PROJECT_ID="YOUR_PROJECT_ID_HERE"
 REGION="us-central1"
 BUCKET_NAME="YOUR_PROJECT_ID_HERE-artifacts"

@@ -111,6 +111,14 @@ which will create a zip file in the scripts for creating the Cloud Function.
 
 4. Uncomment the code in __terraform/functions.tf__, and from the terraform folder run __terraform apply__ once again. Now only the Cloud Function will be deployed.
 
+###### Dataproc Workflow Template
+From the root folder:
+
+1. Run:
+```bash
+scripts/deploy_workflow_template.sh
+```
+to copy the python file to GCS and import the Workflow Template. After this the template is ready to be used in the project.
 ###### Deploy and Trigger the DAG
 From the root folder:
 
