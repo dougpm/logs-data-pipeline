@@ -1,0 +1,72 @@
+version: 1
+dagTimeout: 3600s
+placement:
+  managedCluster:
+    clusterName: 
+    config:
+      gceClusterConfig:
+        zoneUri: us-central1-a
+        metadata:
+          gcs-connector-version: "2.2.0"
+          bigquery-connector-version: "1.2.0"
+          spark-bigquery-connector-version: "0.19.1"
+      masterConfig:
+        machineTypeUri: n1-standard-2
+        diskConfig:
+          bootDiskType: pd-ssd
+          bootDiskSizeGb: 128
+          numLocalSsds: 1
+      softwareConfig:
+        imageVersion: "1.5"
+        properties: 
+          dataproc:efm.spark.shuffle: primary-worker
+          spark:spark.default.parallelism: "42"
+          spark:spark.sql.shuffle.partitions: "42"
+      workerConfig:
+        machineTypeUri: n1-standard-2
+        numInstances: 2
+        diskConfig:
+          bootDiskType: pd-ssd
+          bootDiskSizeGb: 128
+          numLocalSsds: 1
+      secondaryWorkerConfig:
+        machineTypeUri: n1-standard-2
+        numInstances: 0
+        diskConfig:
+          bootDiskType: pd-ssd
+          bootDiskSizeGb: 128
+          numLocalSsds: 1
+      initializationActions:
+        executableFile: "gs://goog-dataproc-initialization-actions-us-central1/connectors/connectors.sh"
+jobs:
+  - stepId: process-logs
+    pysparkJob:
+      args:
+        - input_uri
+        - equipment_sensors_uri
+        - equipment_uri
+        - output_project_dataset_table
+        - staging_bucket
+      mainPythonFileUri:
+parameters:
+  - name: CLUSTER_NAME
+    fields:
+    - placement.managedCluster.clusterName
+  - name: MAIN_PY
+    fields:
+    - jobs['process-logs'].pysparkJob.mainPythonFileUri
+  - name: INPUT_URI
+    fields:
+    - jobs['process-logs'].pysparkJob.args[0]
+  - name: EQUIPMENT_SENSORS_URI
+    fields:
+    - jobs['process-logs'].pysparkJob.args[1]
+  - name: EQUIPMENT_URI
+    fields:
+    - jobs['process-logs'].pysparkJob.args[2]
+  - name: OUTPUT_PROJECT_DATASET_TABLE
+    fields:
+    - jobs['process-logs'].pysparkJob.args[3]
+  - name: STAGING_BUCKET
+    fields:
+    - jobs['process-logs'].pysparkJob.args[4]
