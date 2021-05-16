@@ -1,4 +1,4 @@
-### Hard skill test for a Data Engineer position at Shape Digital
+### Hard skill test for a Data Engineer position at Shape
 
 #### Questions
 
