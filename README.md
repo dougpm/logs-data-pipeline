@@ -72,6 +72,7 @@ Contains utility bash scripts.
 This will replace a placeholder string in all the files where the project ID is used.
 
 3. Download and install the Cloud SDK, instructions [here](https://cloud.google.com/sdk/docs/install).
+4. Setup GCP authentication, instructions [here](https://cloud.google.com/docs/authentication/getting-started).
 
 ###### Terraform Setup
 
