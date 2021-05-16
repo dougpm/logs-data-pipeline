@@ -1,0 +1,1 @@
+gsutil mb gs://YOUR_PROJECT_ID_HERE-terraform
