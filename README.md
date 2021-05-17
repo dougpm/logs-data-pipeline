@@ -97,7 +97,8 @@ The developed solution follows this diagram:
 3. The Cloud Function triggers an Airflow DAG on Cloud Composer.
 4. The Airflow DAG runs a task to instantiate a Dataproc Workflow Template, which runs a PySpark Job to parse the log file, join it with the other two provided tables and load the results to BigQuery.
 5. After processing, the file is moved to another bucket, prefixed by success or failure tags, depending on whether the processing step succeeded or failed.
-#### Folders description
+
+#### Folder descriptions
 
 - __terraform__:
 Contains the terraform files responsible for creating all the GCP resources.
@@ -115,8 +116,11 @@ Contains the DAG file and a script for fetching the Airflow Client ID, which is 
 Contains utility bash scripts.
 
 #### Instructions for running the code
+
 __Note__: The steps described here have been tested in Ubuntu 20.04.
+
 ###### GCP Setup
+
 1. Create a new project in GCP and take note of its ID.
 2. From the root folder, run:
 
@@ -133,7 +137,7 @@ this will replace a placeholder string in all the files where the project ID is 
 1. Download and install terraform, instructions [here](https://learn.hashicorp.com/tutorials/terraform/install-cli).
 2. Run:
 ```bash
-scripts/setup_terraform_backed.sh
+scripts/setup_terraform_backend.sh
 ```
 which will create the Storage Bucket that serves as the backend for storing Terraform's state.
 
@@ -175,6 +179,7 @@ which will create a zip file in the __scripts__ folder containing the Cloud Func
 scripts/deploy_workflow_template.sh
 ```
 to copy the python file to GCS and import the Workflow Template. After this the template is ready to be used in the project.
+
 ###### Deploy and Trigger the DAG
 1. From the root folder, run:
 
