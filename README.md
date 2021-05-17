@@ -85,7 +85,7 @@ For automating this workflow, [Cloud Functions](https://cloud.google.com/functio
 4. Deployment of the Cloud Function.
 5. Creation of the BigQuery dataset.
 
-__Note__: The functions file has its content commented out. The reason for this is that the Composer environment must be created before the function, as information about the it must be filled in the function code before deployment. More on this in the instructions section.
+__Note__: The functions file has its content commented out. The reason for this is that the Composer environment must be created before the function, as information about it must be filled in the function code before deployment. More on this in the instructions section.
 
 ###### Architecture
 The developed solution follows this diagram:
@@ -110,7 +110,7 @@ Contains files related to the Dataproc Workflow Template.
 Contains files related to the Cloud Function responsible for triggering the Airflow DAG whenever a new file is uploaded to the logs bucket in GCS.
 
 - __composer__:
-Contains the DAG file and a script for fetching the Airflow Client ID, which is needed by the Cloud Function.
+Contains the DAG file.
 
 - __scripts__:
 Contains utility bash scripts.
