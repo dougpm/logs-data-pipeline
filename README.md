@@ -8,29 +8,29 @@ On January 2020 considering GMT time zone:
 The query:
 ```sql
 SELECT
-  COUNT(*) AS numberOfFailures
+  COUNT(DISTINCT event_timestamp) AS number_of_failures
 FROM
   RAW_LOGS.equipment_logs
 WHERE
-  DATE(eventTimestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+  DATE(event_timestamp) BETWEEN "2020-01-01" AND "2020-01-31"
 ```
-shows the number of failures to be 11645.
+shows the number of failures to be 1578.
 
 2. Which equipment code had most failures?
 The query:
 ```sql
 SELECT
   code,
-  COUNT(*) AS numberOfFailures
+  COUNT(DISTINCT event_timestamp) AS number_of_failures
 FROM
   RAW_LOGS.equipment_logs
 WHERE
-  DATE(eventTimestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+  DATE(event_timestamp) BETWEEN "2020-01-01" AND "2020-01-31"
 GROUP BY code
-ORDER BY numberOfFailures DESC
+ORDER BY number_of_failures DESC
 LIMIT 1
 ```
-shows E1AD07D4 to be the code of the equipment with most failures.
+shows E1AD07D4 had the most failures, having failed 153 times.
 
 3. Average amount of failures across equipment group, ordering by the amount of failures in ascending order?
 The query:
@@ -38,33 +38,34 @@ The query:
 WITH calculated_totals AS (
 SELECT
   group_name,
-  COUNT(*) OVER (PARTITION BY group_name) as totalFailuresPerGroup,
-  COUNT(*) OVER () AS totalNumberOfFailures
-  
+  COUNT(DISTINCT event_timestamp) AS equipment_failures_per_group,
+  COUNT(DISTINCT equipment_id) AS equipments_per_group
 FROM
-  RAW.equipment_logs
+  RAW_LOGS.equipment_logs
 WHERE
-  DATE(eventTimestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+  DATE(event_timestamp) BETWEEN "2020-01-01" AND "2020-01-31"
+GROUP BY group_name
 )
 
-SELECT DISTINCT
+SELECT
   group_name,
-  ROUND((totalFailuresPerGroup / totalNumberOfFailures), 2) AS avgFailuresPerGroup
-FROM
-  calculated_totals
-ORDER BY avgFailuresPerGroup ASC
+  equipment_failures_per_group,
+  equipments_per_group,
+  (equipment_failures_per_group / equipments_per_group) AS avg_failures_per_group
+FROM calculated_totals
+ORDER BY equipment_failures_per_group ASC
 ```
 produces the following results:
 
-| group_name | avgFailuresPerGroup |
-|------------|---------------------|
-| Z9K1SAP4   |                 0.1 |
-| VAPQY59S   |                0.14 |
-| 9N127Z5P   |                0.15 |
-| NQWPA8D3   |                0.15 |
-| PA92NCXZ   |                0.15 |
-| FGHQWR2Q   |                0.31 |
-
+| group_name | equipment_failures_per_group | equipments_per_group | avg_failures_per_group |
+|------------|------------------------------|----------------------|------------------------|
+| Z9K1SAP4   |                          129 |                    1 |                  129.0 |
+| 9N127Z5P   |                          216 |                    2 |                  108.0 |
+| NQWPA8D3   |                          233 |                    2 |                  116.5 |
+| VAPQY59S   |                          240 |                    2 |                  120.0 |
+| PA92NCXZ   |                          245 |                    2 |                  122.5 |
+| FGHQWR2Q   |                          516 |                    4 |                  129.0 |
+|            |                              |                      |                        |
 #### Solution
 
 The solution uses [Google Cloud Platform](https://cloud.google.com/) services.
