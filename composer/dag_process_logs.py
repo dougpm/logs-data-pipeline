@@ -18,8 +18,8 @@ DEFAULT_DAG_ARGS = {
 
 PROJECT_ID = "YOUR_PROJECT_ID_HERE"
 ARTIFACTS_BUCKET = f"{PROJECT_ID}-artifacts"
-#The cloud function used to trigger this dag provides a dag_run.conf
-#dictionary containing information about the GCS object that triggered it
+# The cloud function used to trigger this dag provides a dag_run.conf
+# dictionary containing information about the GCS object that triggered it
 LOGS_BUCKET = "{{ dag_run.conf['bucket'] }}"
 LOG_FILE = "gs://{{ dag_run.conf['bucket'] }}/{{ dag_run.conf['name'] }}"
 PROCESSED_LOGS_BUCKET = f"{PROJECT_ID}-processed-logs"
@@ -28,18 +28,21 @@ STAGING_BUCKET = f"{PROJECT_ID}-staging"
 SUCCESS_TAG = "processed"
 FAILURE_TAG = "failed"
 
-def move_to_completion_bucket(target_bucket, target_infix, **kwargs):
+
+def move_to_completion_bucket(target_bucket, status_tag, **kwargs):
     """An utility method to move an object to a target location in GCS."""
 
     conn = gcs_hook.GoogleCloudStorageHook()
 
-    source_bucket = kwargs['dag_run'].conf['bucket']
-    source_object = kwargs['dag_run'].conf['name']
-    completion_ds = kwargs['ds']
-    target_object = os.path.join(target_infix, completion_ds, source_object)
+    source_bucket = kwargs["dag_run"].conf["bucket"]
+    source_object = kwargs["dag_run"].conf["name"]
+    completion_ds = kwargs["ds"]
+    target_object = os.path.join(status_tag, completion_ds, source_object)
 
     conn.copy(source_bucket, source_object, target_bucket, target_object)
-    logging.info(f"Copying {source_bucket}/{source_object} to {target_bucket}/{target_object}.")
+    logging.info(
+        f"Copying {source_bucket}/{source_object} to {target_bucket}/{target_object}."
+    )
     conn.delete(source_bucket, source_object)
     logging.info(f"Deleting {source_bucket}/{source_object}.")
 
@@ -66,6 +69,7 @@ with models.DAG(
         },
     )
 
+    # one of these tasks will be executed depending on whether the dataproc task succeeded or failed
     success_move_task = PythonOperator(
         task_id="success-move-to-completion",
         python_callable=move_to_completion_bucket,

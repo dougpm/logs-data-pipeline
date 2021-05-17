@@ -17,8 +17,8 @@ def trigger_dag(data, context=None):
     https://cloud.google.com/functions/docs/writing/background#functions_background_parameters-python
     """
 
-    client_id = '287842730866-lofdtg8pfj66aksufcu25nlla3ng3h4d.apps.googleusercontent.com'
-    tenant_project = 'q8817ba8bb0c111a9p-tp'
+    client_id = 'CLIENT_ID_HERE'
+    tenant_project = 'TENANT_PROJECT_HERE'
     dag_name = 'process-logs'
     webserver_url = (
         'https://'

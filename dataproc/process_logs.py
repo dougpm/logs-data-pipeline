@@ -14,12 +14,12 @@ def main(argv):
     .master("yarn") \
     .appName("parse-sensor-logs") \
     .getOrCreate()
+    #required by the bigquery connector
     spark.conf.set("temporaryGcsBucket", staging_bucket)
     sc = spark.sparkContext
     sc.setLogLevel("WARN")
 
     timestamp_group = r"([0-9]{1,4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2})"
-    level_group = r"([A-Z]+)"
     sensor_group = r"sensor\[(\d+)\]"
     temperature_group = r"temperature\s(-?\d+.\d+)"
     vibration_group = r"vibration\s(-?\d+.\d+)"
@@ -27,12 +27,11 @@ def main(argv):
     logs = spark.read.text(input_uri)
     parsed_logs = logs.select(
         regexp_extract('value', timestamp_group, 1).alias("event_timestamp"),
-        regexp_extract('value', level_group, 1).alias("level"),
         regexp_extract('value', sensor_group, 1).alias("sensor_id"),
         regexp_extract('value', temperature_group, 1).alias("temperature"),
         regexp_extract('value', vibration_group, 1).alias("vibration")
     )
-
+    
     parsed_logs \
         .withColumn("event_timestamp", to_timestamp("event_timestamp")) \
         .withColumn("temperature", parsed_logs.temperature.cast(DoubleType())) \

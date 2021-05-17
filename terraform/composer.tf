@@ -8,8 +8,6 @@ resource "google_composer_environment" "composer" {
     node_config {
         zone         = local.zone
         machine_type = "n2-standard-2"
-        network    = "network-datalabs-develop"
-        subnetwork = "subnet-cluster-services"
     }
 
     software_config {
