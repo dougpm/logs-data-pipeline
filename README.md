@@ -46,7 +46,6 @@ WHERE
   DATE(event_timestamp) BETWEEN "2020-01-01" AND "2020-01-31"
 GROUP BY group_name
 )
-
 SELECT
   group_name,
   equipment_failures_per_group,

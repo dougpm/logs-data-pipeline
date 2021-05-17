@@ -26,7 +26,7 @@ def main(argv):
 
     logs = spark.read.text(input_uri)
     parsed_logs = logs.select(
-        regexp_extract('value', timestamp_group, 1).alias("eventTimestamp"),
+        regexp_extract('value', timestamp_group, 1).alias("event_timestamp"),
         regexp_extract('value', level_group, 1).alias("level"),
         regexp_extract('value', sensor_group, 1).alias("sensor_id"),
         regexp_extract('value', temperature_group, 1).alias("temperature"),
@@ -34,7 +34,7 @@ def main(argv):
     )
 
     parsed_logs \
-        .withColumn("eventTimestamp", to_timestamp("eventTimestamp")) \
+        .withColumn("event_timestamp", to_timestamp("event_timestamp")) \
         .withColumn("temperature", parsed_logs.temperature.cast(DoubleType())) \
         .withColumn("vibration", parsed_logs.vibration.cast(DoubleType())) \
         .createTempView("cleaned_logs")
@@ -57,10 +57,10 @@ def main(argv):
         logs.*
     FROM
         equipment eq
-        LEFT JOIN
+        JOIN
         equipment_sensors eq_s
             USING (equipment_id)
-        LEFT JOIN
+        JOIN
         cleaned_logs logs
             USING(sensor_id)    
     """
@@ -69,7 +69,7 @@ def main(argv):
     equipment_log.write.format("bigquery") \
         .mode("append") \
         .option("partitionType", "DAY") \
-        .option("partitionField", "eventTimestamp") \
+        .option("partitionField", "event_timestamp") \
         .save(output_project_dataset_table)
 
 if __name__ == "__main__":
