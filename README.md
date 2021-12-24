@@ -1,10 +1,21 @@
 # A sample Data Pipeline for processing sensor logs using Google Cloud services.
 #### Solution
 
-The solution uses [Google Cloud Platform](https://cloud.google.com/) services.
+This is a pipeline for processing semi-structured log data dumped in batches. The logs are from equipment failures - everytime an equipment fails, data from all the sensors related to that equipment is logged. The solution uses [Google Cloud Platform](https://cloud.google.com/) services.
+
+###### Architecture
+The developed solution follows this diagram:
+
+![solution_diagram](solution_diagram.png)
+
+1. The log file is uploaded to a GCS Bucket.
+2. The object creation event triggers a Cloud Function.
+3. The Cloud Function triggers an Airflow DAG on Cloud Composer.
+4. The Airflow DAG runs a task to instantiate a Dataproc Workflow Template, which runs a PySpark Job to parse the log file, join it with the other two provided tables and output the results to BigQuery.
+5. After processing, the file is moved to another bucket, prefixed by success or failure tags, depending on whether the processing step succeeded or failed.
 
 ###### Processing
-For parsing the data, the chosen processing engine was [PySpark](https://spark.apache.org/docs/latest/api/python/), running on [Dataproc](https://cloud.google.com/dataproc) in a [Workflow Template](https://cloud.google.com/dataproc/docs/concepts/workflows/overview). Dataproc is a GCP service for running PySpark jobs. Dataproc Workflow Templates is a mechanism for executing Workflows in Dataproc, which consists of creating a cluster, running a graph of jobs, and deleting the cluster.
+For parsing and processing the data, the chosen processing engine was [PySpark](https://spark.apache.org/docs/latest/api/python/), running on [Dataproc](https://cloud.google.com/dataproc) in a [Workflow Template](https://cloud.google.com/dataproc/docs/concepts/workflows/overview). Dataproc is a GCP service for running PySpark jobs. Dataproc Workflow Templates is a mechanism for executing Workflows in Dataproc, which consists of creating a cluster, running a graph of jobs, and deleting the cluster.
 The PySpark job reads the provided files from Cloud Storage buckets, and creates a table in [BigQuery](https://cloud.google.com/bigquery), which is a serverless Data Warehouse.
 
 ###### Automation
@@ -21,18 +32,10 @@ For automating this workflow, [Cloud Functions](https://cloud.google.com/functio
 
 __Note__: The functions file has its content commented out. The reason for this is that the Composer environment must be created before the function, as information about it must be filled in the function code before deployment. More on this in the instructions section.
 
-###### Architecture
-The developed solution follows this diagram:
-
-![solution_diagram](solution_diagram.png)
-
-1. The log file is uploaded to a GCS Bucket.
-2. The object creation event triggers a Cloud Function.
-3. The Cloud Function triggers an Airflow DAG on Cloud Composer.
-4. The Airflow DAG runs a task to instantiate a Dataproc Workflow Template, which runs a PySpark Job to parse the log file, join it with the other two provided tables and load the results to BigQuery.
-5. After processing, the file is moved to another bucket, prefixed by success or failure tags, depending on whether the processing step succeeded or failed.
-
 #### Folder descriptions
+
+- __data__:
+Contains the log file and information about equipments and sensors.
 
 - __terraform__:
 Contains the terraform files responsible for creating all the GCP resources.
