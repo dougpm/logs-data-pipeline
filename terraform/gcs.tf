@@ -29,13 +29,13 @@ resource "google_storage_bucket" "staging" {
 resource "google_storage_bucket_object" "equipment_sensors" {
   name   = "tables/equipment_sensors.csv"
   bucket = google_storage_bucket.artifacts.name
-  source = "../shape-data/equipment_sensors.csv"
+  source = "../data/equipment_sensors.csv"
 }
 
 resource "google_storage_bucket_object" "equipment" {
   name   = "tables/equipment.json"
   bucket = google_storage_bucket.artifacts.name
-  source = "../shape-data/equipment.json"
+  source = "../data/equipment.json"
 }
 
 
